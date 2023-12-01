@@ -1,0 +1,1 @@
+# standard_social_game_client
