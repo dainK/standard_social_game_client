@@ -2,6 +2,7 @@ import { Bodies, Body, Engine, Events, Render, Runner, World } from "matter-js";
 import { FRUITS_BASE, FRUITS_HLW } from "./fruits";
 import "./style/dark.css";
 
+
 export default {
   name: "Game",
   data() {
@@ -14,6 +15,7 @@ export default {
     initializeGame() {
       let THEME = "halloween"; // { base, halloween }
       let FRUITS = FRUITS_BASE;
+      let SCORE = [1,3,6,10,15,21,28,36,45,55,66];
 
       switch (THEME) {
         case "halloween":
@@ -36,16 +38,7 @@ export default {
       });
 
       const world = engine.world;
-
-      // const timerBody = Bodies.rectangle(200, 200, 100, 20, {
-      //   isStatic: true,
-      //   render: {
-      //     sprite: {
-      //       texture: './path/to/your/countdown_sprite.png', // Add the path to your sprite image
-      //     },
-      //   },
-      // });
-
+      
       const leftWall = Bodies.rectangle(15, 395, 30, 790, {
         isStatic: true,
         render: { fillStyle: "#E6B143" },
@@ -68,7 +61,7 @@ export default {
         render: { fillStyle: "#E6B143" },
       });
 
-      World.add(world, [leftWall, rightWall, ground, topLine]);
+      World.add(world, [ leftWall, rightWall, ground, topLine]);
 
       Render.run(render);
       Runner.run(engine);
@@ -90,17 +83,86 @@ export default {
         }
       }, 1000);
 
+
+      let timer = null;
+      let score = null;
+      let scoreIndex = 0;
+      function gameOver() {
+        fetch("http://localhost:3017/api/ranking", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              // 다른 필요한 헤더가 있다면 여기에 추가
+          },
+          body: JSON.stringify({
+              name: "GUEST",
+              score : scoreIndex
+          }),
+        }).then((response) => response.json())
+            .then((response) => {
+                console.log(response);
+              })
+              .catch((error) => console.error("에러 발생:", error));
+      }
+
+      // ************************* Text to Image **********************
+      function createImage(text){
+        let drawing = document.createElement("canvas");
+    
+        drawing.width = '300'
+        drawing.height = '150'
+        let ctx = drawing.getContext("2d");
+        ctx.fillStyle = "#000";
+        ctx.font = "20pt sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(text, 85, 75);
+        return drawing.toDataURL("image/png");
+      }
+      // ************************* Timer **********************
       function stopTimer() {
         clearInterval(timerInterval);
+        // alert("Game over");
+        gameOver();
       }
 
       function updateTimer() {
         const remainingTime = countdown - elapsedTime;
         console.log(remainingTime);
+        if(timer) {
+          World.remove(world, timer);
+        }
 
-        // const spriteFrame = Math.floor((elapsedTime / countdown) * numberOfFrames); // Adjust numberOfFrames accordingly
-        // timerBody.render.sprite.frame = spriteFrame;
+        timer = Bodies.rectangle(100, 100, 500,100, {
+          isSleeping: true,
+          isSensor:true,
+          render: {
+            sprite: {texture: createImage(`Time: ${remainingTime}s`)}
+          }
+        });
+  
+        World.add(world, timer);
       }
+      updateTimer();
+      // ************************* score **********************
+      function updateScore(index) {
+        //scoreIndex += SCORE[index];
+        // console.log(remainingTime);
+        if(score) {
+          World.remove(world, score);
+        }
+
+        score = Bodies.rectangle(500, 100, 500,100, {
+          isSleeping: true,
+          isSensor:true,
+          render: {
+            sprite: {texture: createImage(`Score: ${scoreIndex}`)}
+          }
+        });
+  
+        World.add(world, score);
+      }
+      updateScore(0); // 기본 0으로 보여주기
+      // ***********************************************************
 
       function addFruit() {
         const index = Math.floor(Math.random() * 5);
@@ -180,6 +242,10 @@ export default {
             if (index === FRUITS.length - 1) {
               return;
             }
+            
+            // score update
+            scoreIndex += SCORE[index];
+            updateScore(scoreIndex);
 
             World.remove(world, [collision.bodyA, collision.bodyB]);
 
@@ -205,7 +271,8 @@ export default {
             (collision.bodyA.name === "topLine" ||
               collision.bodyB.name === "topLine")
           ) {
-            alert("Game over");
+            // alert("Game over");
+            gameOver();
           }
         });
       });
