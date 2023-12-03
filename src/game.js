@@ -1,30 +1,22 @@
-import { Bodies, Body, Engine, Events, Render, Runner, World } from 'matter-js';
-import { FRUITS_BASE, FRUITS_HLW } from './fruits';
-import './style/dark.css';
+import { Bodies, Body, Engine, Events, Render, Runner, World } from "matter-js";
+import { FRUITS_BASE, FRUITS_HLW } from "./fruits";
+import "./style/dark.css";
 
 export default {
-  name: 'Game',
+  name: "Game",
   data() {
-    return {
-      engine: null,
-      render: null,
-      world: null,
-      currentBody: null,
-      currentFruit: null,
-      disableAction: false,
-      interval: null,
-    };
+    return {};
   },
   mounted() {
     this.initializeGame();
   },
   methods: {
     initializeGame() {
-      let THEME = 'halloween'; // { base, halloween }
+      let THEME = "halloween"; // { base, halloween }
       let FRUITS = FRUITS_BASE;
 
       switch (THEME) {
-        case 'halloween':
+        case "halloween":
           FRUITS = FRUITS_HLW;
           break;
         default:
@@ -37,7 +29,7 @@ export default {
         element: document.body,
         options: {
           wireframes: false,
-          background: '#F7F4C8',
+          background: "#F7F4C8",
           width: 620,
           height: 850,
         },
@@ -45,26 +37,35 @@ export default {
 
       const world = engine.world;
 
+      // const timerBody = Bodies.rectangle(200, 200, 100, 20, {
+      //   isStatic: true,
+      //   render: {
+      //     sprite: {
+      //       texture: './path/to/your/countdown_sprite.png', // Add the path to your sprite image
+      //     },
+      //   },
+      // });
+
       const leftWall = Bodies.rectangle(15, 395, 30, 790, {
         isStatic: true,
-        render: { fillStyle: '#E6B143' },
+        render: { fillStyle: "#E6B143" },
       });
 
       const rightWall = Bodies.rectangle(605, 395, 30, 790, {
         isStatic: true,
-        render: { fillStyle: '#E6B143' },
+        render: { fillStyle: "#E6B143" },
       });
 
       const ground = Bodies.rectangle(310, 820, 620, 60, {
         isStatic: true,
-        render: { fillStyle: '#E6B143' },
+        render: { fillStyle: "#E6B143" },
       });
 
       const topLine = Bodies.rectangle(310, 150, 620, 2, {
-        name: 'topLine',
+        name: "topLine",
         isStatic: true,
         isSensor: true,
-        render: { fillStyle: '#E6B143' },
+        render: { fillStyle: "#E6B143" },
       });
 
       World.add(world, [leftWall, rightWall, ground, topLine]);
@@ -76,6 +77,30 @@ export default {
       let currentFruit = null;
       let disableAction = false;
       let interval = null;
+
+      let elapsedTime = 0;
+      let countdown = 60;
+
+      let timerInterval = setInterval(() => {
+        elapsedTime += 1;
+        updateTimer();
+
+        if (elapsedTime >= countdown) {
+          stopTimer();
+        }
+      }, 1000);
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function updateTimer() {
+        const remainingTime = countdown - elapsedTime;
+        console.log(remainingTime);
+
+        // const spriteFrame = Math.floor((elapsedTime / countdown) * numberOfFrames); // Adjust numberOfFrames accordingly
+        // timerBody.render.sprite.frame = spriteFrame;
+      }
 
       function addFruit() {
         const index = Math.floor(Math.random() * 5);
@@ -102,7 +127,7 @@ export default {
         }
 
         switch (event.code) {
-          case 'KeyA':
+          case "KeyA":
             if (interval) return;
 
             interval = setInterval(() => {
@@ -114,7 +139,7 @@ export default {
             }, 5);
             break;
 
-          case 'KeyD':
+          case "KeyD":
             if (interval) return;
 
             interval = setInterval(() => {
@@ -126,7 +151,7 @@ export default {
             }, 5);
             break;
 
-          case 'KeyS':
+          case "KeyS":
             currentBody.isSleeping = false;
             disableAction = true;
 
@@ -140,14 +165,14 @@ export default {
 
       window.onkeyup = (event) => {
         switch (event.code) {
-          case 'KeyA':
-          case 'KeyD':
+          case "KeyA":
+          case "KeyD":
             clearInterval(interval);
             interval = null;
         }
       };
 
-      Events.on(engine, 'collisionStart', (event) => {
+      Events.on(engine, "collisionStart", (event) => {
         event.pairs.forEach((collision) => {
           if (collision.bodyA.index === collision.bodyB.index) {
             const index = collision.bodyA.index;
@@ -169,7 +194,7 @@ export default {
                   sprite: { texture: `${newFruit.name}.png` },
                 },
                 index: index + 1,
-              },
+              }
             );
 
             World.add(world, newBody);
@@ -177,9 +202,10 @@ export default {
 
           if (
             !disableAction &&
-            (collision.bodyA.name === 'topLine' || collision.bodyB.name === 'topLine')
+            (collision.bodyA.name === "topLine" ||
+              collision.bodyB.name === "topLine")
           ) {
-            alert('Game over');
+            alert("Game over");
           }
         });
       });

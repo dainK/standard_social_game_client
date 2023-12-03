@@ -40,10 +40,8 @@ header, footer {
 }
 
 router-view {
-  margin-top: 20px;
+  height: 850px;
   width: 620px;
   max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
 }
 </style>
