@@ -73,7 +73,7 @@ export default {
       let interval = null;
 
       let elapsedTime = 0;
-      let countdown = 5;
+      let countdown = 60;
 
       let timerInterval = setInterval(() => {
         elapsedTime += 1;
