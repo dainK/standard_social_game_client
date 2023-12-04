@@ -1,3 +1,1 @@
-
 <script type="module" src="/src/game.js"></script>
-  

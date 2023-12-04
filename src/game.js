@@ -1,6 +1,7 @@
 import { Bodies, Body, Engine, Events, Render, Runner, World } from "matter-js";
 import { FRUITS_BASE, FRUITS_HLW } from "./fruits";
 import "./style/dark.css";
+import player from"./utils/player";
 
 
 export default {
@@ -72,7 +73,7 @@ export default {
       let interval = null;
 
       let elapsedTime = 0;
-      let countdown = 60;
+      let countdown = 5;
 
       let timerInterval = setInterval(() => {
         elapsedTime += 1;
@@ -87,7 +88,11 @@ export default {
       let timer = null;
       let score = null;
       let scoreIndex = 0;
+      let self = this;
       function gameOver() {
+        
+        disableAction = true;
+
         fetch("http://localhost:3017/api/ranking", {
           method: "POST",
           headers: {
@@ -100,7 +105,17 @@ export default {
           }),
         }).then((response) => response.json())
             .then((response) => {
-                console.log(response);
+                player.currScore = response.data;
+
+                const renderCanvas = render.canvas;
+                World.remove(engine.world, render);
+                renderCanvas.parentNode.removeChild(renderCanvas);
+                
+                World.clear(world,false);
+                Engine.clear(engine);
+                Events.off(engine);
+
+                self.$router.push('/rank');
               })
               .catch((error) => console.error("에러 발생:", error));
       }
