@@ -1,4 +1,4 @@
-import player from"./utils/player";
+import player from"./player";
 import { Bodies, Body, Engine, Events, Render, Runner, World } from "matter-js";
 
 export default {
