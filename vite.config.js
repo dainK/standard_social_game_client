@@ -1,12 +1,12 @@
 // vite.config.js
 import { defineConfig } from 'vite';
-import Vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-  plugins: [Vue()],
+  plugins: [],
   build: {
     rollupOptions: {
       input: '/src/main.js', 
     },
   },
+  base:"/standard_social_game_client/"
 });
