@@ -8,5 +8,5 @@ export default defineConfig({
       input: '/src/main.js', 
     },
   },
-  base:"/standard_social_game_client/"
+  base:"./"
 });
