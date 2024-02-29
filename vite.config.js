@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [],
   build: {
     rollupOptions: {
-      input: '/src/main.js', 
+      input: './src/main.js', 
     },
   },
   base:"/standard_social_game_client/"
