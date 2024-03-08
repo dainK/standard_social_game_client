@@ -1,4 +1,14 @@
-import { Bodies, Body, Engine, Events, Render, Runner, World } from 'matter-js';
+import {
+  Bodies,
+  Body,
+  Engine,
+  Events,
+  Render,
+  Runner,
+  World,
+  Mouse,
+  MouseConstraint,
+} from 'matter-js';
 import { FRUITS_BASE, FRUITS_HLW } from './fruits';
 import './style/dark.css';
 import { player } from './player.js';
@@ -110,7 +120,7 @@ let scoreIndex = 0;
 // let self = this;
 function gameOver() {
   disableAction = true;
-  var nickname = prompt('닉네임을 입력하세요:', '');
+  var nickname = prompt('닉네임을 입력하세요:', 'NO NAME');
   // localData.push({ name: nickname, score: scoreIndex });
 
   fetch(`${import.meta.env.VITE_API}/api/ranking/score`, {
@@ -410,7 +420,7 @@ function addFruit() {
     render: {
       sprite: { texture: `${fruit.name}.png` },
     },
-    restitution: 0.2,
+    restitution: 0.4,
   });
 
   currentBody = body;
@@ -418,6 +428,35 @@ function addFruit() {
 
   World.add(world, body);
 }
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+});
+// 클릭 이벤트 감지
+Events.on(mouseConstraint, 'mousedown', (event) => {
+  if (disableAction) {
+    return;
+  }
+
+  // 클릭한 위치로 몸체 이동
+  if (
+    event.mouse.position.x - currentFruit.radius > 30 &&
+    event.mouse.position.x + currentFruit.radius < 590
+  ) {
+    Body.setPosition(currentBody, {
+      x: event.mouse.position.x,
+      y: currentBody.position.y,
+    });
+
+    currentBody.isSleeping = false;
+    disableAction = true;
+
+    setTimeout(() => {
+      addFruit();
+      disableAction = false;
+    }, 1000);
+  }
+});
 
 window.onkeydown = (event) => {
   if (disableAction) {
@@ -460,10 +499,10 @@ window.onkeydown = (event) => {
       }, 1000);
       break;
 
-    case 'KeyE':
-      scoreIndex = 500;
-      gameOver();
-      break;
+    // case 'KeyE':
+    //   scoreIndex = 500;
+    //   gameOver();
+    //   break;
   }
 };
 
