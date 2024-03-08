@@ -1,26 +1,25 @@
-import { Bodies, Body, Engine, Events, Render, Runner, World } from "matter-js";
-import { FRUITS_BASE, FRUITS_HLW } from "./fruits";
-import "./style/dark.css";
-import {player} from "./player.js";
-import { createGame } from "./gameModule.js";
+import { Bodies, Body, Engine, Events, Render, Runner, World } from 'matter-js';
+import { FRUITS_BASE, FRUITS_HLW } from './fruits';
+import './style/dark.css';
+import { player } from './player.js';
+import { createGame } from './gameModule.js';
 
 // 게임 초기화
 let { engine, render, world } = createGame();
 
-let THEME = "halloween"; // { base, halloween }
+let THEME = 'halloween'; // { base, halloween }
 let FRUITS = FRUITS_BASE;
 let SCORE = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66];
 
-let localData = [];
-// 배열을 로컬 스토리지에 저장하는 함수
-function saveArrayToLocalStorage(key, array) {
-  // 배열을 JSON 문자열로 변환하여 저장
-  localStorage.setItem(key, JSON.stringify(array));
-}
-if(getArrayFromLocalStorage('myLocalData'))
-{
-  localData = getArrayFromLocalStorage('myLocalData');
-}
+// let localData = [];
+// // 배열을 로컬 스토리지에 저장하는 함수
+// function saveArrayToLocalStorage(key, array) {
+//   // 배열을 JSON 문자열로 변환하여 저장
+//   localStorage.setItem(key, JSON.stringify(array));
+// }
+// if (getArrayFromLocalStorage('myLocalData')) {
+//   localData = getArrayFromLocalStorage('myLocalData');
+// }
 
 // 로컬 스토리지에서 배열을 읽어오는 함수
 function getArrayFromLocalStorage(key) {
@@ -30,15 +29,15 @@ function getArrayFromLocalStorage(key) {
 }
 
 const replayText = Bodies.rectangle(100, 100, 500, 100, {
-      isSleeping: true,
-      isSensor: true,
-      render: {
-        sprite: { texture: createImage(`Replay : R`) },
-      },
-    });
+  isSleeping: true,
+  isSensor: true,
+  render: {
+    sprite: { texture: createImage(`Replay : R`) },
+  },
+});
 
 switch (THEME) {
-  case "halloween":
+  case 'halloween':
     FRUITS = FRUITS_HLW;
     break;
   default:
@@ -51,37 +50,37 @@ render = Render.create({
   element: document.body,
   options: {
     wireframes: false,
-    background: "#F7F4C8",
+    background: '#F7F4C8',
     width: 620,
     height: 850,
   },
 });
 
- world = engine.world;
+world = engine.world;
 
 const leftWall = Bodies.rectangle(15, 395, 30, 790, {
   isStatic: true,
-  render: { fillStyle: "#E6B143" },
+  render: { fillStyle: '#E6B143' },
 });
 
 const rightWall = Bodies.rectangle(605, 395, 30, 790, {
   isStatic: true,
-  render: { fillStyle: "#E6B143" },
+  render: { fillStyle: '#E6B143' },
 });
 
 const ground = Bodies.rectangle(310, 820, 620, 60, {
   isStatic: true,
-  render: { fillStyle: "#E6B143" },
+  render: { fillStyle: '#E6B143' },
 });
 
 const topLine = Bodies.rectangle(310, 150, 620, 2, {
-  name: "topLine",
+  name: 'topLine',
   isStatic: true,
   isSensor: true,
-  render: { fillStyle: "#E6B143" },
+  render: { fillStyle: '#E6B143' },
 });
 
-World.add(world, [leftWall, rightWall, ground, topLine,replayText]);
+World.add(world, [leftWall, rightWall, ground, topLine, replayText]);
 
 Render.run(render);
 Runner.run(engine);
@@ -108,160 +107,252 @@ let interval = null;
 // let timer = null;
 let score = null;
 let scoreIndex = 0;
-let self = this;
-// function gameOver() {
-//   disableAction = true;
-
-//   fetch("http://localhost:3017/api/ranking", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       // 다른 필요한 헤더가 있다면 여기에 추가
-//     },
-//     body: JSON.stringify({
-//       name: "GUEST",
-//       score: scoreIndex,
-//     }),
-//   })
-//     .then((response) => response.json())
-//     .then((response) => {
-//       player.currScore = response.data;
-
-//       const renderCanvas = render.canvas;
-//       World.remove(engine.world, render);
-//       renderCanvas.parentNode.removeChild(renderCanvas);
-
-//       World.clear(world, false);
-//       Engine.clear(engine);
-//       Events.off(engine);
-
-//       self.$router.push("/rank");
-//     })
-//     .catch((error) => console.error("에러 발생:", error));
-// }
-
+// let self = this;
 function gameOver() {
-
-  // alert(`gameOver! your score ${score}`);
+  disableAction = true;
   var nickname = prompt('닉네임을 입력하세요:', '');
-  localData.push({name:nickname,score:scoreIndex});
-  saveArrayToLocalStorage('myLocalData',localData);
+  // localData.push({ name: nickname, score: scoreIndex });
 
-  const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
-    isSleeping: true,
-    isSensor: true,
-    render: {
-      sprite: { texture: createImage(`Replay : R`) },
+  fetch(`${import.meta.env.VITE_API}/api/ranking/score`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // 다른 필요한 헤더가 있다면 여기에 추가
     },
-  });
-  
-  const ranking = Bodies.rectangle(300, 30, 500, 100, {
-    isSleeping: true,
-    isSensor: true,
-    render: {
-      sprite: { texture: createImage(`Ranking`) },
-    },
-  });
+    body: JSON.stringify({
+      name: nickname,
+      score: scoreIndex,
+    }),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      // player.currScore = response.data;
+      console.log(response);
 
-  const rankingbg = Bodies.rectangle(310, 20, 620, 50, {
-    name: "topLine",
-    isStatic: true,
-    isSensor: true,
-    render: { fillStyle: "#E6B143" },
-  });
+      const renderCanvas = render.canvas;
+      World.remove(engine.world, render);
+      renderCanvas.parentNode.removeChild(renderCanvas);
 
+      World.clear(world, false);
+      Engine.clear(engine);
+      Events.off(engine);
 
-  const renderCanvas = render.canvas;
-  World.remove(engine.world, render);
-  renderCanvas.parentNode.removeChild(renderCanvas);
+      const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
+        isSleeping: true,
+        isSensor: true,
+        render: {
+          sprite: { texture: createImage(`Replay : R`) },
+        },
+      });
 
-  World.clear(world, false);
-  Engine.clear(engine);
-  Events.off(engine);
+      const ranking = Bodies.rectangle(300, 30, 500, 100, {
+        isSleeping: true,
+        isSensor: true,
+        render: {
+          sprite: { texture: createImage(`Ranking`) },
+        },
+      });
 
-  // self.$router.push("/rank");
-   engine = Engine.create();
-       render = Render.create({
+      const rankingbg = Bodies.rectangle(310, 20, 620, 50, {
+        name: 'topLine',
+        isStatic: true,
+        isSensor: true,
+        render: { fillStyle: '#E6B143' },
+      });
+
+      // self.$router.push("/rank");
+      engine = Engine.create();
+      render = Render.create({
         engine,
         element: document.body,
         options: {
           wireframes: false,
-          background: "#F7F4C8",
+          background: '#F7F4C8',
           width: 620,
           height: 850,
         },
       });
-       world = engine.world;
+      world = engine.world;
 
       const myRank = Bodies.rectangle(310, 400, 620, 50, {
-        name: "topLine",
+        name: 'topLine',
         isStatic: true,
         isSensor: true,
-        render: { fillStyle: "#E6B143" },
+        render: { fillStyle: '#E6B143' },
       });
 
-      World.add(world, [myRank,replayText2,rankingbg,ranking]);
+      World.add(world, [myRank, replayText2, rankingbg, ranking]);
       Render.run(render);
       Runner.run(engine);
 
-      function createRankingOne(rank,name,score,index) {
-        const ranktext = Bodies.rectangle(200, 410+index*50, 500,100, {
+      function createRankingOne(rank, name, score, index) {
+        const ranktext = Bodies.rectangle(200, 410 + index * 50, 500, 100, {
           isSleeping: true,
-          isSensor:true,
+          isSensor: true,
           render: {
-            sprite: {texture: createImage(`${rank}`)}
-          }
+            sprite: { texture: createImage(`${rank}`) },
+          },
         });
-        const nametext = Bodies.rectangle(300, 410+index*50, 500,100, {
+        const nametext = Bodies.rectangle(300, 410 + index * 50, 500, 100, {
           isSleeping: true,
-          isSensor:true,
+          isSensor: true,
           render: {
-            sprite: {texture: createImage(`${name}`)}
-          }
+            sprite: { texture: createImage(`${name}`) },
+          },
         });
-        const scoretext = Bodies.rectangle(500, 410+index*50, 500,100, {
+        const scoretext = Bodies.rectangle(500, 410 + index * 50, 500, 100, {
           isSleeping: true,
-          isSensor:true,
+          isSensor: true,
           render: {
-            sprite: {texture: createImage(`${score}`)}
-          }
+            sprite: { texture: createImage(`${score}`) },
+          },
         });
-        World.add(world, [ranktext,nametext,scoretext]);
+        World.add(world, [ranktext, nametext, scoretext]);
       }
-      
 
-      const currData = localData[localData.length-1];
-      const sortRank = localData.sort((a,b)=>b.score-a.score);
+      const currData = response.playerData; //localData[localData.length - 1];
+      const sortRank = response.rankings; //.sort((a, b) => b.score - a.score);
       let newIndex = -1;
-           sortRank.forEach((e,index)=>{
-              if(currData.score === e.score &&
-                currData.name === e.name ) {
-                  newIndex = index;
-              }
-            });
-            // console.log(response.data[newIndex]);
-            for(let i = -5; i<6; i++) {
-              if( newIndex+i > -1 && newIndex+i < sortRank.length) {
-                createRankingOne(newIndex+i,sortRank[newIndex+i].name,sortRank[newIndex+i].score,i);
-              }
-            }
-            
-
-    
+      sortRank.forEach((e, index) => {
+        if (currData.score === e.score && currData.name === e.name) {
+          newIndex = index;
+        }
+      });
+      // console.log(response.data[newIndex]);
+      for (let i = -5; i < 6; i++) {
+        if (newIndex + i > -1 && newIndex + i < sortRank.length) {
+          createRankingOne(
+            newIndex + i,
+            sortRank[newIndex + i].name,
+            sortRank[newIndex + i].score,
+            i,
+          );
+        }
+      }
+    })
+    .catch((error) => console.error('에러 발생:', error));
 }
+
+// function gameOver() {
+//   // alert(`gameOver! your score ${score}`);
+//   // var nickname = prompt('닉네임을 입력하세요:', '');
+//   // localData.push({ name: nickname, score: scoreIndex });
+//   // saveArrayToLocalStorage('myLocalData', localData);
+
+//   const renderCanvas = render.canvas;
+//   World.remove(engine.world, render);
+//   renderCanvas.parentNode.removeChild(renderCanvas);
+
+//   World.clear(world, false);
+//   Engine.clear(engine);
+//   Events.off(engine);
+
+//   const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
+//     isSleeping: true,
+//     isSensor: true,
+//     render: {
+//       sprite: { texture: createImage(`Replay : R`) },
+//     },
+//   });
+
+//   const ranking = Bodies.rectangle(300, 30, 500, 100, {
+//     isSleeping: true,
+//     isSensor: true,
+//     render: {
+//       sprite: { texture: createImage(`Ranking`) },
+//     },
+//   });
+
+//   const rankingbg = Bodies.rectangle(310, 20, 620, 50, {
+//     name: 'topLine',
+//     isStatic: true,
+//     isSensor: true,
+//     render: { fillStyle: '#E6B143' },
+//   });
+
+//   // self.$router.push("/rank");
+//   engine = Engine.create();
+//   render = Render.create({
+//     engine,
+//     element: document.body,
+//     options: {
+//       wireframes: false,
+//       background: '#F7F4C8',
+//       width: 620,
+//       height: 850,
+//     },
+//   });
+//   world = engine.world;
+
+//   const myRank = Bodies.rectangle(310, 400, 620, 50, {
+//     name: 'topLine',
+//     isStatic: true,
+//     isSensor: true,
+//     render: { fillStyle: '#E6B143' },
+//   });
+
+//   World.add(world, [myRank, replayText2, rankingbg, ranking]);
+//   Render.run(render);
+//   Runner.run(engine);
+
+//   function createRankingOne(rank, name, score, index) {
+//     const ranktext = Bodies.rectangle(200, 410 + index * 50, 500, 100, {
+//       isSleeping: true,
+//       isSensor: true,
+//       render: {
+//         sprite: { texture: createImage(`${rank}`) },
+//       },
+//     });
+//     const nametext = Bodies.rectangle(300, 410 + index * 50, 500, 100, {
+//       isSleeping: true,
+//       isSensor: true,
+//       render: {
+//         sprite: { texture: createImage(`${name}`) },
+//       },
+//     });
+//     const scoretext = Bodies.rectangle(500, 410 + index * 50, 500, 100, {
+//       isSleeping: true,
+//       isSensor: true,
+//       render: {
+//         sprite: { texture: createImage(`${score}`) },
+//       },
+//     });
+//     World.add(world, [ranktext, nametext, scoretext]);
+//   }
+
+//   const currData = localData[localData.length - 1];
+//   const sortRank = localData.sort((a, b) => b.score - a.score);
+//   let newIndex = -1;
+//   sortRank.forEach((e, index) => {
+//     if (currData.score === e.score && currData.name === e.name) {
+//       newIndex = index;
+//     }
+//   });
+//   // console.log(response.data[newIndex]);
+//   for (let i = -5; i < 6; i++) {
+//     if (newIndex + i > -1 && newIndex + i < sortRank.length) {
+//       createRankingOne(
+//         newIndex + i,
+//         sortRank[newIndex + i].name,
+//         sortRank[newIndex + i].score,
+//         i,
+//       );
+//     }
+//   }
+// }
 
 // ************************* Text to Image **********************
 function createImage(text) {
-  let drawing = document.createElement("canvas");
+  let drawing = document.createElement('canvas');
 
-  drawing.width = "300";
-  drawing.height = "150";
-  let ctx = drawing.getContext("2d");
-  ctx.fillStyle = "#000";
-  ctx.font = "20pt sans-serif";
-  ctx.textAlign = "left";
+  drawing.width = '300';
+  drawing.height = '150';
+  let ctx = drawing.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.font = '20pt sans-serif';
+  ctx.textAlign = 'left';
   ctx.fillText(text, 85, 75);
-  return drawing.toDataURL("image/png");
+  return drawing.toDataURL('image/png');
 }
 // ************************* Timer **********************
 // function stopTimer() {
@@ -334,7 +425,7 @@ window.onkeydown = (event) => {
   }
 
   switch (event.code) {
-    case "KeyA":
+    case 'KeyA':
       if (interval) return;
 
       interval = setInterval(() => {
@@ -346,7 +437,7 @@ window.onkeydown = (event) => {
       }, 5);
       break;
 
-    case "KeyD":
+    case 'KeyD':
       if (interval) return;
 
       interval = setInterval(() => {
@@ -358,8 +449,8 @@ window.onkeydown = (event) => {
       }, 5);
       break;
 
-    case "KeyS":
-    case "Space":
+    case 'KeyS':
+    case 'Space':
       currentBody.isSleeping = false;
       disableAction = true;
 
@@ -368,27 +459,27 @@ window.onkeydown = (event) => {
         disableAction = false;
       }, 1000);
       break;
-      
-    // case "KeyT":
-    //   scoreIndex = 4000;
-    //   gameOver();
-    //   break;
+
+    case 'KeyE':
+      scoreIndex = 500;
+      gameOver();
+      break;
   }
 };
 
 window.onkeyup = (event) => {
   switch (event.code) {
-    case "KeyA":
-    case "KeyD":
+    case 'KeyA':
+    case 'KeyD':
       clearInterval(interval);
       interval = null;
       break;
-    case "KeyR":
+    case 'KeyR':
       location.reload();
   }
 };
 
-Events.on(engine, "collisionStart", (event) => {
+Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((collision) => {
     if (collision.bodyA.index === collision.bodyB.index) {
       const index = collision.bodyA.index;
@@ -414,7 +505,7 @@ Events.on(engine, "collisionStart", (event) => {
             sprite: { texture: `${newFruit.name}.png` },
           },
           index: index + 1,
-        }
+        },
       );
 
       World.add(world, newBody);
@@ -422,7 +513,7 @@ Events.on(engine, "collisionStart", (event) => {
 
     if (
       !disableAction &&
-      (collision.bodyA.name === "topLine" || collision.bodyB.name === "topLine")
+      (collision.bodyA.name === 'topLine' || collision.bodyB.name === 'topLine')
     ) {
       // alert("Game over");
       gameOver();
