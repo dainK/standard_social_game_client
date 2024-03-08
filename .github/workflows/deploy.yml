@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Set environment variables
-       run: |
+        run: | 
           echo "VITE_API=${{ secrets.VITE_API }}" >> $GITHUB_ENV
       - name: Build
         run: npm run build
