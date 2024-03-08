@@ -429,7 +429,7 @@ function addFruit() {
     render: {
       sprite: { texture: `${fruit.name}.png` },
     },
-    restitution: 0.4,
+    restitution: 0.2,
     // label: 'fruit',
   });
 
