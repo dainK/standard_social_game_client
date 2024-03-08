@@ -121,7 +121,8 @@ let scoreIndex = 0;
 // let self = this;
 function gameOver() {
   disableAction = true;
-  var nickname = prompt('닉네임을 입력하세요:', 'NO NAME');
+  let nickname = 'NO NAME';
+  nickname = prompt('닉네임을 입력하세요:', 'NO NAME');
   // localData.push({ name: nickname, score: scoreIndex });
 
   fetch(`${import.meta.env.VITE_API}/api/ranking/score`, {
@@ -449,8 +450,8 @@ Events.on(mouseConstraint, 'mousedown', (event) => {
 
   // 클릭한 위치로 몸체 이동
   if (
-    event.mouse.position.x - currentFruit.radius > 30 &&
-    event.mouse.position.x + currentFruit.radius < 590
+    event.mouse.position.x - currentFruit.radius > 15 &&
+    event.mouse.position.x + currentFruit.radius < 605
   ) {
     Body.setPosition(currentBody, {
       x: event.mouse.position.x,
