@@ -41,6 +41,7 @@ function getArrayFromLocalStorage(key) {
 const replayText = Bodies.rectangle(100, 100, 500, 100, {
   isSleeping: true,
   isSensor: true,
+  isStatic: true,
   render: {
     sprite: { texture: createImage(`Replay : R`) },
   },
@@ -150,6 +151,7 @@ function gameOver() {
       const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
         isSleeping: true,
         isSensor: true,
+        isStatic: true,
         render: {
           sprite: { texture: createImage(`Replay : R`) },
         },
@@ -158,6 +160,7 @@ function gameOver() {
       const ranking = Bodies.rectangle(300, 30, 500, 100, {
         isSleeping: true,
         isSensor: true,
+        isStatic: true,
         render: {
           sprite: { texture: createImage(`Ranking`) },
         },
@@ -199,6 +202,7 @@ function gameOver() {
         const ranktext = Bodies.rectangle(200, 410 + index * 50, 500, 100, {
           isSleeping: true,
           isSensor: true,
+          isStatic: true,
           render: {
             sprite: { texture: createImage(`${rank}`) },
           },
@@ -206,6 +210,7 @@ function gameOver() {
         const nametext = Bodies.rectangle(300, 410 + index * 50, 500, 100, {
           isSleeping: true,
           isSensor: true,
+          isStatic: true,
           render: {
             sprite: { texture: createImage(`${name}`) },
           },
@@ -213,6 +218,7 @@ function gameOver() {
         const scoretext = Bodies.rectangle(500, 410 + index * 50, 500, 100, {
           isSleeping: true,
           isSensor: true,
+          isStatic: true,
           render: {
             sprite: { texture: createImage(`${score}`) },
           },
@@ -400,6 +406,7 @@ function updateScore(index) {
   score = Bodies.rectangle(500, 100, 500, 100, {
     isSleeping: true,
     isSensor: true,
+    isStatic: true,
     render: {
       sprite: { texture: createImage(`Score: ${scoreIndex}`) },
     },
@@ -415,12 +422,14 @@ function addFruit() {
   const fruit = FRUITS[index];
 
   const body = Bodies.circle(300, 50, fruit.radius, {
+    name: 'fruit',
     index: index,
     isSleeping: true,
     render: {
       sprite: { texture: `${fruit.name}.png` },
     },
     restitution: 0.4,
+    // label: 'fruit',
   });
 
   currentBody = body;
@@ -520,37 +529,39 @@ window.onkeyup = (event) => {
 
 Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((collision) => {
-    if (collision.bodyA.index === collision.bodyB.index) {
-      const index = collision.bodyA.index;
+    if (collision.bodyA.name === 'fruit' && collision.bodyB.name === 'fruit') {
+      if (collision.bodyA.index === collision.bodyB.index) {
+        const index = collision.bodyA.index;
 
-      if (index === FRUITS.length - 1) {
-        return;
-      }
+        if (index === FRUITS.length - 1) {
+          return;
+        }
 
-      // score update
-      scoreIndex += SCORE[index];
-      updateScore(scoreIndex);
+        // score update
+        scoreIndex += SCORE[index];
+        updateScore(scoreIndex);
 
-      World.remove(world, [collision.bodyA, collision.bodyB]);
+        World.remove(world, [collision.bodyA, collision.bodyB]);
 
-      const newFruit = FRUITS[index + 1];
+        const newFruit = FRUITS[index + 1];
 
-      const newBody = Bodies.circle(
-        collision.collision.supports[0].x,
-        collision.collision.supports[0].y,
-        newFruit.radius,
-        {
-          render: {
-            sprite: { texture: `${newFruit.name}.png` },
+        const newBody = Bodies.circle(
+          collision.collision.supports[0].x,
+          collision.collision.supports[0].y,
+          newFruit.radius,
+          {
+            name: 'fruit',
+            render: {
+              sprite: { texture: `${newFruit.name}.png` },
+            },
+            index: index + 1,
+            // label: 'fruit',
           },
-          index: index + 1,
-        },
-      );
+        );
 
-      World.add(world, newBody);
-    }
-
-    if (
+        World.add(world, newBody);
+      }
+    } else if (
       !disableAction &&
       (collision.bodyA.name === 'topLine' || collision.bodyB.name === 'topLine')
     ) {
