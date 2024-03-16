@@ -420,7 +420,11 @@ Events.on(engine, 'collisionStart', (event) => {
           {
             name: 'fruit',
             render: {
-              sprite: { texture: `${newFruit.name}.png` },
+              sprite: {
+                texture: `${fruit.name}.png`,
+                xScale: scale,
+                yScale: scale,
+              },
             },
             index: index + 1,
             // label: 'fruit',
