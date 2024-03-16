@@ -317,8 +317,8 @@ Events.on(mouseConstraint, 'mousedown', (event) => {
 
   // 클릭한 위치로 몸체 이동
   if (
-    event.mouse.position.x - currentFruit.radius > 15 * scale &&
-    event.mouse.position.x + currentFruit.radius < 605 * scale
+    event.mouse.position.x - currentFruit.radius * scale > 15 * scale &&
+    event.mouse.position.x + currentFruit.radius * scale < 605 * scale
   ) {
     Body.setPosition(currentBody, {
       x: event.mouse.position.x,
