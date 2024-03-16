@@ -11,41 +11,53 @@ import {
 } from 'matter-js';
 import { FRUITS_BASE, FRUITS_HLW } from './fruits';
 import './style/dark.css';
-import { player } from './player.js';
-import { createGame } from './gameModule.js';
-
-// 게임 초기화
-let { engine, render, world } = createGame();
 
 let THEME = 'halloween'; // { base, halloween }
 let FRUITS = FRUITS_BASE;
 let SCORE = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66];
 
-// let localData = [];
-// // 배열을 로컬 스토리지에 저장하는 함수
-// function saveArrayToLocalStorage(key, array) {
-//   // 배열을 JSON 문자열로 변환하여 저장
-//   localStorage.setItem(key, JSON.stringify(array));
-// }
-// if (getArrayFromLocalStorage('myLocalData')) {
-//   localData = getArrayFromLocalStorage('myLocalData');
-// }
+// 현재 디바이스의 화면 가로 및 세로 해상도 가져오기
+const screenWidth = window.innerWidth;
+const screenHeight = window.innerHeight;
 
-// 로컬 스토리지에서 배열을 읽어오는 함수
-function getArrayFromLocalStorage(key) {
-  // JSON 문자열을 읽어와서 배열로 변환하여 반환
-  const jsonString = localStorage.getItem(key);
-  return jsonString ? JSON.parse(jsonString) : [];
-}
+// 원래 게임 화면의 크기
+const originalWidth = 620;
+const originalHeight = 880;
 
-const replayText = Bodies.rectangle(100, 100, 500, 100, {
-  isSleeping: true,
-  isSensor: true,
-  isStatic: true,
-  render: {
-    sprite: { texture: createImage(`Replay : R`) },
+// 가로 및 세로 스케일 계산
+const scale = Math.min(
+  screenWidth / originalWidth,
+  screenHeight / originalHeight,
+);
+
+let engine = Engine.create();
+let render = Render.create({
+  engine,
+  element: document.body,
+  options: {
+    wireframes: false,
+    background: '#F7F4C8',
+    width: 620 * scale,
+    height: 850 * scale,
   },
 });
+
+let world = engine.world;
+
+const replayText = Bodies.rectangle(
+  100 * scale,
+  100 * scale,
+  500 * scale,
+  100 * scale,
+  {
+    isSleeping: true,
+    isSensor: true,
+    isStatic: true,
+    render: {
+      sprite: { texture: createImage(`Replay : R`) },
+    },
+  },
+);
 
 switch (THEME) {
   case 'halloween':
@@ -55,41 +67,50 @@ switch (THEME) {
     FRUITS = FRUITS_BASE;
 }
 
-engine = Engine.create();
-render = Render.create({
-  engine,
-  element: document.body,
-  options: {
-    wireframes: false,
-    background: '#F7F4C8',
-    width: 620,
-    height: 850,
+const leftWall = Bodies.rectangle(
+  15 * scale,
+  395 * scale,
+  30 * scale,
+  790 * scale,
+  {
+    isStatic: true,
+    render: { fillStyle: '#E6B143' },
   },
-});
+);
 
-world = engine.world;
+const rightWall = Bodies.rectangle(
+  605 * scale,
+  395 * scale,
+  30 * scale,
+  790 * scale,
+  {
+    isStatic: true,
+    render: { fillStyle: '#E6B143' },
+  },
+);
+const ground = Bodies.rectangle(
+  310 * scale,
+  820 * scale,
+  620 * scale,
+  60 * scale,
+  {
+    isStatic: true,
+    render: { fillStyle: '#E6B143' },
+  },
+);
 
-const leftWall = Bodies.rectangle(15, 395, 30, 790, {
-  isStatic: true,
-  render: { fillStyle: '#E6B143' },
-});
-
-const rightWall = Bodies.rectangle(605, 395, 30, 790, {
-  isStatic: true,
-  render: { fillStyle: '#E6B143' },
-});
-
-const ground = Bodies.rectangle(310, 820, 620, 60, {
-  isStatic: true,
-  render: { fillStyle: '#E6B143' },
-});
-
-const topLine = Bodies.rectangle(310, 150, 620, 2, {
-  name: 'topLine',
-  isStatic: true,
-  isSensor: true,
-  render: { fillStyle: '#E6B143' },
-});
+const topLine = Bodies.rectangle(
+  310 * scale,
+  150 * scale,
+  620 * scale,
+  2 * scale,
+  {
+    name: 'topLine',
+    isStatic: true,
+    isSensor: true,
+    render: { fillStyle: '#E6B143' },
+  },
+);
 
 World.add(world, [leftWall, rightWall, ground, topLine, replayText]);
 
@@ -101,29 +122,12 @@ let currentFruit = null;
 let disableAction = false;
 let interval = null;
 
-// let elapsedTime = 0;
-// let countdown = 60;
-
-// let timerInterval = setInterval(() => {
-//   // elapsedTime += 1;
-//   // updateTimer();
-
-//   // if (elapsedTime >= countdown) {
-//   //   stopTimer();
-//   // }
-//   clearInterval(timerInterval);
-//   gameOver();
-// }, 1000);
-
-// let timer = null;
 let score = null;
 let scoreIndex = 0;
-// let self = this;
 function gameOver() {
   disableAction = true;
   let nickname = 'NO NAME';
   nickname = prompt('닉네임을 입력하세요:', 'NO NAME');
-  // localData.push({ name: nickname, score: scoreIndex });
 
   fetch(`${import.meta.env.VITE_API}/api/ranking/score`, {
     method: 'POST',
@@ -140,7 +144,6 @@ function gameOver() {
     .then((response) => {
       // player.currScore = response.data;
       console.log(response);
-
       const renderCanvas = render.canvas;
       World.remove(engine.world, render);
       renderCanvas.parentNode.removeChild(renderCanvas);
@@ -148,6 +151,7 @@ function gameOver() {
       World.clear(world, false);
       Engine.clear(engine);
       Events.off(engine);
+      // 게임 초기화
 
       const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
         isSleeping: true,
@@ -250,161 +254,26 @@ function gameOver() {
     .catch((error) => console.error('에러 발생:', error));
 }
 
-// function gameOver() {
-//   // alert(`gameOver! your score ${score}`);
-//   // var nickname = prompt('닉네임을 입력하세요:', '');
-//   // localData.push({ name: nickname, score: scoreIndex });
-//   // saveArrayToLocalStorage('myLocalData', localData);
-
-//   const renderCanvas = render.canvas;
-//   World.remove(engine.world, render);
-//   renderCanvas.parentNode.removeChild(renderCanvas);
-
-//   World.clear(world, false);
-//   Engine.clear(engine);
-//   Events.off(engine);
-
-//   const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
-//     isSleeping: true,
-//     isSensor: true,
-//     render: {
-//       sprite: { texture: createImage(`Replay : R`) },
-//     },
-//   });
-
-//   const ranking = Bodies.rectangle(300, 30, 500, 100, {
-//     isSleeping: true,
-//     isSensor: true,
-//     render: {
-//       sprite: { texture: createImage(`Ranking`) },
-//     },
-//   });
-
-//   const rankingbg = Bodies.rectangle(310, 20, 620, 50, {
-//     name: 'topLine',
-//     isStatic: true,
-//     isSensor: true,
-//     render: { fillStyle: '#E6B143' },
-//   });
-
-//   // self.$router.push("/rank");
-//   engine = Engine.create();
-//   render = Render.create({
-//     engine,
-//     element: document.body,
-//     options: {
-//       wireframes: false,
-//       background: '#F7F4C8',
-//       width: 620,
-//       height: 850,
-//     },
-//   });
-//   world = engine.world;
-
-//   const myRank = Bodies.rectangle(310, 400, 620, 50, {
-//     name: 'topLine',
-//     isStatic: true,
-//     isSensor: true,
-//     render: { fillStyle: '#E6B143' },
-//   });
-
-//   World.add(world, [myRank, replayText2, rankingbg, ranking]);
-//   Render.run(render);
-//   Runner.run(engine);
-
-//   function createRankingOne(rank, name, score, index) {
-//     const ranktext = Bodies.rectangle(200, 410 + index * 50, 500, 100, {
-//       isSleeping: true,
-//       isSensor: true,
-//       render: {
-//         sprite: { texture: createImage(`${rank}`) },
-//       },
-//     });
-//     const nametext = Bodies.rectangle(300, 410 + index * 50, 500, 100, {
-//       isSleeping: true,
-//       isSensor: true,
-//       render: {
-//         sprite: { texture: createImage(`${name}`) },
-//       },
-//     });
-//     const scoretext = Bodies.rectangle(500, 410 + index * 50, 500, 100, {
-//       isSleeping: true,
-//       isSensor: true,
-//       render: {
-//         sprite: { texture: createImage(`${score}`) },
-//       },
-//     });
-//     World.add(world, [ranktext, nametext, scoretext]);
-//   }
-
-//   const currData = localData[localData.length - 1];
-//   const sortRank = localData.sort((a, b) => b.score - a.score);
-//   let newIndex = -1;
-//   sortRank.forEach((e, index) => {
-//     if (currData.score === e.score && currData.name === e.name) {
-//       newIndex = index;
-//     }
-//   });
-//   // console.log(response.data[newIndex]);
-//   for (let i = -5; i < 6; i++) {
-//     if (newIndex + i > -1 && newIndex + i < sortRank.length) {
-//       createRankingOne(
-//         newIndex + i,
-//         sortRank[newIndex + i].name,
-//         sortRank[newIndex + i].score,
-//         i,
-//       );
-//     }
-//   }
-// }
-
 // ************************* Text to Image **********************
 function createImage(text) {
   let drawing = document.createElement('canvas');
 
-  drawing.width = '300';
-  drawing.height = '150';
+  drawing.width = 300 * scale + '';
+  drawing.height = 150 * scale + '';
   let ctx = drawing.getContext('2d');
   ctx.fillStyle = '#000';
-  ctx.font = '20pt sans-serif';
+  ctx.font = 20 * scale + 'pt sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText(text, 85, 75);
+  ctx.fillText(text, 85 * scale, 75 * scale);
   return drawing.toDataURL('image/png');
 }
-// ************************* Timer **********************
-// function stopTimer() {
-//   clearInterval(timerInterval);
-//   // alert("Game over");
-//   gameOver();
-// }
 
-// function updateTimer() {
-//   const remainingTime = countdown - elapsedTime;
-//   console.log(remainingTime);
-//   if (timer) {
-//     World.remove(world, timer);
-//   }
-
-//   timer = Bodies.rectangle(100, 100, 500, 100, {
-//     isSleeping: true,
-//     isSensor: true,
-//     render: {
-//       sprite: { texture: createImage(`Time: ${remainingTime}s`) },
-//     },
-//   });
-
-//   World.add(world, timer);
-// }
-// updateTimer();
-// ************************* score **********************
 function updateScore(index) {
-  //scoreIndex += SCORE[index];
-  // console.log(remainingTime);
   if (score) {
     World.remove(world, score);
   }
 
-  score = Bodies.rectangle(500, 100, 500, 100, {
+  score = Bodies.rectangle(500 * scale, 100 * scale, 500 * scale, 100 * scale, {
     isSleeping: true,
     isSensor: true,
     isStatic: true,
@@ -421,16 +290,14 @@ updateScore(0); // 기본 0으로 보여주기
 function addFruit() {
   const index = Math.floor(Math.random() * 5);
   const fruit = FRUITS[index];
-
-  const body = Bodies.circle(300, 50, fruit.radius, {
+  const body = Bodies.circle(300 * scale, 50 * scale, fruit.radius * scale, {
     name: 'fruit',
     index: index,
     isSleeping: true,
     render: {
-      sprite: { texture: `${fruit.name}.png` },
+      sprite: { texture: `${fruit.name}.png`, xScale: scale, yScale: scale },
     },
     restitution: 0.2,
-    // label: 'fruit',
   });
 
   currentBody = body;
@@ -450,8 +317,8 @@ Events.on(mouseConstraint, 'mousedown', (event) => {
 
   // 클릭한 위치로 몸체 이동
   if (
-    event.mouse.position.x - currentFruit.radius > 15 &&
-    event.mouse.position.x + currentFruit.radius < 605
+    event.mouse.position.x - currentFruit.radius > 15 * scale &&
+    event.mouse.position.x + currentFruit.radius < 605 * scale
   ) {
     Body.setPosition(currentBody, {
       x: event.mouse.position.x,
@@ -478,7 +345,7 @@ window.onkeydown = (event) => {
       if (interval) return;
 
       interval = setInterval(() => {
-        if (currentBody.position.x - currentFruit.radius > 30)
+        if (currentBody.position.x - currentFruit.radius > 30 * scale)
           Body.setPosition(currentBody, {
             x: currentBody.position.x - 1,
             y: currentBody.position.y,
@@ -490,7 +357,7 @@ window.onkeydown = (event) => {
       if (interval) return;
 
       interval = setInterval(() => {
-        if (currentBody.position.x + currentFruit.radius < 590)
+        if (currentBody.position.x + currentFruit.radius < 590 * scale)
           Body.setPosition(currentBody, {
             x: currentBody.position.x + 1,
             y: currentBody.position.y,
