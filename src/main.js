@@ -142,7 +142,6 @@ function gameOver() {
   })
     .then((response) => response.json())
     .then((response) => {
-      // player.currScore = response.data;
       console.log(response);
       const renderCanvas = render.canvas;
       World.remove(engine.world, render);
