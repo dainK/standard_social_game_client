@@ -142,7 +142,7 @@ function gameOver() {
   })
     .then((response) => response.json())
     .then((response) => {
-      // player.currScore = response.data;
+      player.currScore = response.data;
       console.log(response);
       const renderCanvas = render.canvas;
       World.remove(engine.world, render);
@@ -153,30 +153,48 @@ function gameOver() {
       Events.off(engine);
       // 게임 초기화
 
-      const replayText2 = Bodies.rectangle(100, 100, 500, 100, {
-        isSleeping: true,
-        isSensor: true,
-        isStatic: true,
-        render: {
-          sprite: { texture: createImage(`Replay : R`) },
+      const replayText2 = Bodies.rectangle(
+        100 * scale,
+        100 * scale,
+        500 * scale,
+        100 * scale,
+        {
+          isSleeping: true,
+          isSensor: true,
+          isStatic: true,
+          render: {
+            sprite: { texture: createImage(`Replay : R`) },
+          },
         },
-      });
+      );
 
-      const ranking = Bodies.rectangle(300, 30, 500, 100, {
-        isSleeping: true,
-        isSensor: true,
-        isStatic: true,
-        render: {
-          sprite: { texture: createImage(`Ranking`) },
+      const ranking = Bodies.rectangle(
+        300 * scale,
+        30 * scale,
+        500 * scale,
+        100 * scale,
+        {
+          isSleeping: true,
+          isSensor: true,
+          isStatic: true,
+          render: {
+            sprite: { texture: createImage(`Ranking`) },
+          },
         },
-      });
+      );
 
-      const rankingbg = Bodies.rectangle(310, 20, 620, 50, {
-        name: 'topLine',
-        isStatic: true,
-        isSensor: true,
-        render: { fillStyle: '#E6B143' },
-      });
+      const rankingbg = Bodies.rectangle(
+        310 * scale,
+        20 * scale,
+        620 * scale,
+        50 * scale,
+        {
+          name: 'topLine',
+          isStatic: true,
+          isSensor: true,
+          render: { fillStyle: '#E6B143' },
+        },
+      );
 
       // self.$router.push("/rank");
       engine = Engine.create();
@@ -186,48 +204,72 @@ function gameOver() {
         options: {
           wireframes: false,
           background: '#F7F4C8',
-          width: 620,
-          height: 850,
+          width: 620 * scale,
+          height: 850 * scale,
         },
       });
       world = engine.world;
 
-      const myRank = Bodies.rectangle(310, 400, 620, 50, {
-        name: 'topLine',
-        isStatic: true,
-        isSensor: true,
-        render: { fillStyle: '#E6B143' },
-      });
+      const myRank = Bodies.rectangle(
+        310 * scale,
+        400 * scale,
+        620 * scale,
+        50 * scale,
+        {
+          name: 'topLine',
+          isStatic: true,
+          isSensor: true,
+          render: { fillStyle: '#E6B143' },
+        },
+      );
 
       World.add(world, [myRank, replayText2, rankingbg, ranking]);
       Render.run(render);
       Runner.run(engine);
 
       function createRankingOne(rank, name, score, index) {
-        const ranktext = Bodies.rectangle(200, 410 + index * 50, 500, 100, {
-          isSleeping: true,
-          isSensor: true,
-          isStatic: true,
-          render: {
-            sprite: { texture: createImage(`${rank}`) },
+        const ranktext = Bodies.rectangle(
+          200 * scale,
+          (410 + index * 50) * scale,
+          500 * scale,
+          100 * scale,
+          {
+            isSleeping: true,
+            isSensor: true,
+            isStatic: true,
+            render: {
+              sprite: { texture: createImage(`${rank}`) },
+            },
           },
-        });
-        const nametext = Bodies.rectangle(300, 410 + index * 50, 500, 100, {
-          isSleeping: true,
-          isSensor: true,
-          isStatic: true,
-          render: {
-            sprite: { texture: createImage(`${name}`) },
+        );
+        const nametext = Bodies.rectangle(
+          300 * scale,
+          (410 + index * 50) * scale,
+          500 * scale,
+          100 * scale,
+          {
+            isSleeping: true,
+            isSensor: true,
+            isStatic: true,
+            render: {
+              sprite: { texture: createImage(`${name}`) },
+            },
           },
-        });
-        const scoretext = Bodies.rectangle(500, 410 + index * 50, 500, 100, {
-          isSleeping: true,
-          isSensor: true,
-          isStatic: true,
-          render: {
-            sprite: { texture: createImage(`${score}`) },
+        );
+        const scoretext = Bodies.rectangle(
+          500 * scale,
+          (410 + index * 50) * scale,
+          500 * scale,
+          100 * scale,
+          {
+            isSleeping: true,
+            isSensor: true,
+            isStatic: true,
+            render: {
+              sprite: { texture: createImage(`${score}`) },
+            },
           },
-        });
+        );
         World.add(world, [ranktext, nametext, scoretext]);
       }
 
