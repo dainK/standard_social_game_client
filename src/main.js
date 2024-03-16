@@ -416,7 +416,7 @@ Events.on(engine, 'collisionStart', (event) => {
         const newBody = Bodies.circle(
           collision.collision.supports[0].x,
           collision.collision.supports[0].y,
-          newFruit.radius,
+          newFruit.radius * scale,
           {
             name: 'fruit',
             render: {
